@@ -628,13 +628,15 @@ let mk='dep', yL=2026, yf=2026, lagPlaying=false, lagLast=null, lagRaf=null;
 /* --- canvasoppsett --- */
 const cv=document.getElementById('lagcv'), ctx=cv.getContext('2d');
 const pv=document.getElementById('lagpyr'), pctx=pv.getContext('2d');
+let DIMC={w:600,h:340},DIMP={w:420,h:340};
+function layout(){DIMC=fit(cv);DIMP=fit(pv);}
 function fit(c){const dpr=window.devicePixelRatio||1,w=Math.max(120,c.parentNode.clientWidth-24),h=+c.getAttribute('height');
   c.style.height=h+'px';c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
   c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);return{w,h}}
 
 /* --- hovedkurver + forsinkelsesfelt --- */
 function drawChart(){
-  const {w,h}=fit(cv);
+  const {w,h}=DIMC;
   const padL=44,padR=14,padT=18,split=h-110,padB=h-16;     // kurvefelt øverst, lag-felt nederst
   const lagT=split+46,lagB=padB;
   ctx.clearRect(0,0,w,h);
@@ -709,7 +711,7 @@ function drawChart(){
 
 /* --- overlagt pyramide: Lillestrøm(yL) fylt, Nord-Norge(yNN) omriss --- */
 function drawPyr(){
-  const {w,h}=fit(pv);
+  const {w,h}=DIMP;
   const r=lagAt(mk,yL),yN=r.ny==null?Y0:r.ny;
   pctx.clearRect(0,0,w,h);
   const padT=14,padB=20,cx=w/2,rowH=(h-padT-padB)/106;
@@ -774,10 +776,11 @@ cv.addEventListener('pointerdown',ev=>{lagSetPlay(false);const rc=cv.getBounding
   document.getElementById('lagyr').value=yL;redraw();});
 const lagView=document.getElementById('view-lag');
 window.__lagShow=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  layout();
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){redraw();return;}
   yL=Y0;yf=Y0;document.getElementById('lagyr').value=Y0;redraw();lagSetPlay(true);}));
 window.__lagHide=()=>lagSetPlay(false);
-window.addEventListener('resize',()=>{if(lagView.classList.contains('on'))redraw();});
+window.addEventListener('resize',()=>{if(lagView.classList.contains('on')){layout();redraw();}});
 })();
 
 </script>
@@ -805,12 +808,14 @@ function at(r,yf){const y0=Math.min(Y1-1,Math.floor(yf)),f=yf-y0;
 
 const cv=document.getElementById('dotcv'),ctx=cv.getContext('2d');
 const sp=document.getElementById('dotsp'),sctx=sp.getContext('2d');
+let DIMQ={w:520,h:380},DIMS={w:420,h:380};
+function layout(){DIMQ=fit(cv);DIMS=fit(sp);}
 function fit(c){const dpr=window.devicePixelRatio||1,w=Math.max(120,c.parentNode.clientWidth-24),h=+c.getAttribute('height');
   c.style.height=h+'px';c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
   c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);return{w,h}}
 
 function drawSquare(){
-  const {w,h}=fit(cv);ctx.clearRect(0,0,w,h);
+  const {w,h}=DIMQ;ctx.clearRect(0,0,w,h);
   const side=Math.min(w-8,h-44),ox=(w-side)/2,oy=10,cell=side/COLS,R=cell*0.36;
   const d=at(reg,yr),V=S[reg].V,nB=d.b/V,nP=d.p/V,startP=Math.ceil(nB);
   function pos(i){const col=i%COLS,row=Math.floor(i/COLS);
@@ -833,7 +838,7 @@ function drawSquare(){
 }
 
 function drawSpark(){
-  const {w,h}=fit(sp);sctx.clearRect(0,0,w,h);
+  const {w,h}=DIMS;sctx.clearRect(0,0,w,h);
   const padL=40,padR=12,padT=16,padB=30;
   const xs=y=>padL+(y-Y0)/(Y1-Y0)*(w-padL-padR);
   let hi=0;for(let y=Y0;y<=Y1;y++)hi=Math.max(hi,S[reg].p[y]/S[reg].b[y]);
@@ -889,10 +894,11 @@ REGS.forEach(r=>{const b=document.createElement('span');b.className='btn'+(r===r
 document.getElementById('dotplay').onclick=()=>setPlay(!playing);
 document.getElementById('dotyr').addEventListener('input',e=>{setPlay(false);yr=+e.target.value;redraw();});
 window.__dotShow=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  layout();
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){redraw();return;}
   yr=Y0;redraw();setPlay(true);}));
 window.__dotHide=()=>setPlay(false);
-window.addEventListener('resize',()=>{if(dotView.classList.contains('on'))redraw();});
+window.addEventListener('resize',()=>{if(dotView.classList.contains('on')){layout();redraw();}});
 })();
 
 </script>
